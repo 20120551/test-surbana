@@ -1,0 +1,22 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Location {
+  id String @id @default(uuid())
+
+  building       String
+  locationName   String @map("location_name")
+  locationNumber String @map("location_number")
+  area           String
+
+  parents Json
+
+  @@map("locations")
+}
