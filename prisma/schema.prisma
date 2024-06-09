@@ -14,9 +14,9 @@ model Location {
   building       String
   locationName   String @map("location_name")
   locationNumber String @map("location_number")
-  area           String
+  area           Int
 
-  parents Json
+  parentIds Json @default("[]") @map("parent_ids")
 
   @@map("locations")
 }

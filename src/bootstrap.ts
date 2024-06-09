@@ -6,16 +6,17 @@ import {
   INestApplication,
   Type,
   Module as ModuleDecorator,
+  NestApplicationOptions,
 } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { json } from 'express';
 
 export type ImportType = Array<
   Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
 >;
 
-export type BootstrapOptions = {
+export type BootstrapOptions = NestApplicationOptions & {
   enableSwagger?: boolean;
-  enableLogger?: boolean;
   allowLargePayload?: boolean;
   worker?: boolean;
   modules: object;
@@ -51,12 +52,19 @@ export const getApplicationContext = (worker?: boolean) => {
 };
 
 export const createApplication = async (options?: BootstrapOptions) => {
-  const modules = options?.modules;
-  const applicationContext = getApplicationContext(options?.worker);
+  const { modules, worker, enableSwagger, allowLargePayload, ...payload } =
+    options || {};
+  const applicationContext = getApplicationContext(worker);
 
-  const app = await applicationContext(modules, {
-    logger: options.enableLogger,
-  });
+  const app = await applicationContext(modules, payload);
+
+  if (enableSwagger) {
+    setupSwagger(app);
+  }
+
+  if (allowLargePayload) {
+    app.use(json({ limit: '50mb' }));
+  }
 
   return app as INestApplication<any>;
 };

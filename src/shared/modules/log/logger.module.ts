@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigurableLoggerModuleClass } from '.';
 import { ILogger } from './interfaces';
-import { ConsoleLogger } from './services/logger.service';
+import { ConsoleLogService } from './services';
 
 @Module({
   providers: [
     {
       provide: ILogger,
-      useClass: ConsoleLogger,
+      useClass: ConsoleLogService,
     },
   ],
   exports: [ILogger],

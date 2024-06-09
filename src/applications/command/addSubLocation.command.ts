@@ -1,7 +1,8 @@
 import { ICommand } from '@nestjs/cqrs';
 
-export class CreateLocationCommand implements ICommand {
+export class AddSubLocationCommand implements ICommand {
   constructor(
+    public parentLocationId: string,
     public building: string,
     public locationName: string,
     public locationNumber: string,

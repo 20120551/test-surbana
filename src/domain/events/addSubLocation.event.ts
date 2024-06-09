@@ -1,7 +1,8 @@
-import { ICommand } from '@nestjs/cqrs';
+import { IEvent } from '@nestjs/cqrs';
 
-export class CreateLocationCommand implements ICommand {
+export class AddSubLocationEvent implements IEvent {
   constructor(
+    public id: string,
     public building: string,
     public locationName: string,
     public locationNumber: string,
