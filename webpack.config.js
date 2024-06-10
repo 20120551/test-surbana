@@ -1,3 +1,6 @@
+require('dotenv').config();
+
+const { env } = require('process');
 const path = require('path');
 const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
@@ -10,11 +13,11 @@ const lazyImports = [
   'class-transformer/storage',
 ];
 
-module.exports = {
+module.exports = () => ({
   entry: './src/main.ts',
   target: 'node',
-  mode: 'production',
-  devtool: 'no-source-map',
+  mode: env.NODE_ENV === 'prod' ? 'production' : 'development',
+  devtool: env.NODE_ENV === 'prod' ? 'nosources-source-map' : 'source-map',
   module: {
     rules: [
       {
@@ -45,6 +48,9 @@ module.exports = {
       shared: path.resolve(__dirname, 'src/shared'),
     },
   },
+  optimization: {
+    minimize: false,
+  },
   plugins: [
     new webpack.IgnorePlugin({
       checkResource(resource) {
@@ -63,9 +69,9 @@ module.exports = {
         {
           from: '*.node',
           context: 'node_modules/.prisma/client/',
-          to: 'src',
+          to: 'node',
         },
       ],
     }),
   ],
-};
+});
