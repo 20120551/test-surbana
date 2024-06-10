@@ -35,12 +35,12 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-      - name: load env
-        run: echo "${{ secrets.ENV }}" > .env
-
       - name: Deploy to App Runner
         id: deploy-apprunner
         uses: awslabs/amazon-app-runner-deploy@main
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: ${{ secrets.NODE_ENV }}
         with:
           service: app-runner-image-deploy-service
           image: ${{ steps.build-image.outputs.image }}
@@ -52,7 +52,8 @@ jobs:
           wait-for-service-stability-second: 1200
           port: 3000
           copy-env-vars: |
-            echo "${{ secrets.ENV }}"
+            DATABASE_URL
+            NODE_ENV
 
       - name: App Runner output
         run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}"
