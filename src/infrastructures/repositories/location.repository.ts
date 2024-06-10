@@ -138,9 +138,16 @@ export class LocationRepository implements ILocationRepository {
   async delete(location: LocationEntity): Promise<void> {
     const deletedLocations = await this.prismaService.location.deleteMany({
       where: {
-        parentIds: {
-          array_contains: location.id,
-        },
+        OR: [
+          {
+            id: location.id,
+          },
+          {
+            parentIds: {
+              array_contains: location.id,
+            },
+          },
+        ],
       },
     });
 

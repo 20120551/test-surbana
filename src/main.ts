@@ -26,7 +26,7 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new LoggingInterceptor(logger));
 
-  logger.info(`Server is listen on port ${3001}`);
+  logger.info(`Server is listen on port ${3000}`);
 
   await app.listen(3001);
 }
