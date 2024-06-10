@@ -33,7 +33,7 @@ module.exports = () => ({
   },
   output: {
     libraryTarget: 'commonjs2',
-    path: path.join(__dirname, 'dist'),
+    path: path.join(__dirname, 'dist/bundles'),
     filename: '[name].js',
     sourceMapFilename: '[file].map',
   },
@@ -69,7 +69,27 @@ module.exports = () => ({
         {
           from: '*.node',
           context: 'node_modules/.prisma/client/',
-          to: 'node',
+          to: '../node',
+        },
+        {
+          from: 'node_modules/swagger-ui-dist/swagger-ui.css',
+          to: '.',
+        },
+        {
+          from: 'node_modules/swagger-ui-dist/swagger-ui-bundle.js',
+          to: '.',
+        },
+        {
+          from: 'node_modules/swagger-ui-dist/swagger-ui-standalone-preset.js',
+          to: '.',
+        },
+        {
+          from: 'node_modules/swagger-ui-dist/favicon-16x16.png',
+          to: '.',
+        },
+        {
+          from: 'node_modules/swagger-ui-dist/favicon-32x32.png',
+          to: '.',
         },
       ],
     }),

@@ -28,6 +28,6 @@ async function bootstrap() {
 
   logger.info(`Server is listen on port ${3000}`);
 
-  await app.listen(3001);
+  await app.listen(3000);
 }
 bootstrap();

@@ -12,8 +12,6 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 COPY --from=build /build/dist/node /.prisma/client
-COPY --from=build /build/dist ./dist
-RUN rm -rf dist/node
+COPY --from=build /build/dist/bundles ./dist
 EXPOSE 3000
 CMD [ "node", "dist/main.js" ]
-
