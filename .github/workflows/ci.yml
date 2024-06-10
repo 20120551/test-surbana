@@ -46,6 +46,7 @@ jobs:
           image: ${{ steps.build-image.outputs.image }}
           runtime: NODEJS_20
           region: ${{ secrets.AWS_REGION }}
+          access-role-arn: ${{ secrets.ROLE_ARN }}
           cpu: 1
           memory: 2
           port: 8080
