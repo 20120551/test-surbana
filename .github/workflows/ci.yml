@@ -12,11 +12,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: CheckEnv
-        run: |
-          echo "${{ secrets.ENV }}" > .env
-          cat .env
-
       - name: Configure AWS credentials
         id: aws-credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -33,12 +28,15 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: nodejs
+          ECR_REPOSITORY: $ECR_REPOSITORY
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: load env
+        run: echo "${{ secrets.ENV }}" > .env
 
       - name: Deploy to App Runner
         id: deploy-apprunner
