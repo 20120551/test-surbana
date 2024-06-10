@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  api:
+    container_name: api
+    build: .
+    environment:
+      NODE_ENV: 'prod'
+      DATABASE_URL: postgresql://postgres:pass123@postgres:5432/postgres?schema=public
+    depends_on:
+      - postgres
+    ports:
+      - '3000:3000'
+
+  postgres:
+    container_name: postgres
+    image: postgres:15.3-alpine3.18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass123
+      POSTGRES_DB: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - data:/data/postgres
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - '5432:5432'
+
+volumes:
+  data: {}
