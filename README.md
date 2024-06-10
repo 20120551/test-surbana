@@ -1,73 +1,81 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Documentation
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Architecture
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### 1. Folder Structure
+![Folder Structure](documents/folder-structure.png)
 
-## Description
+| Folder         | Description                                                                                                                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| prisma         | Contains the Prisma schema and migration versions.                                                                                                                                           |
+| shared         | The shared layer includes utility libraries that can be used in multiple layers of the application. It can be extended by moving it to an npm registry for use across multiple applications. |
+| domain         | The domain layer contains domain entities that represent real-life objects (e.g., Location).                                                                                                 |
+| application    | The application layer contains application-specific rules.                                                                                                                                   |
+| infrastructure | The infrastructure layer implements libraries, persists data to the database, publishes events to queues, etc.                                                                               |
+| api            | The API layer includes controllers, guards, interceptors, middleware, etc., and serves as the interface for incoming requests.                                                               |
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### 2. Clean Architecture
+![Clean Architecture](documents/clean-arch.png)
 
-## Installation
+Based on the folder structure, we have multiple layers to implement. Now, how do these layers communicate with each other?
 
-```bash
-$ npm install
-```
+The core of this architecture is the Entity, which resides in the domain layer. It contains enterprise business logic representing real-life objects. It defines interfaces (e.g., ILocationRepository) but does not implement them. These interfaces are used in the application layer's use cases.
 
-## Running the app
+The application layer handles business requirements, using repositories exposed by the domain layer to define commands (for data mutation) and queries (for data retrieval) to describe business logic. These commands and queries are called by the API layer.
 
-```bash
-# development
-$ npm run start
+The infrastructure layer handles all framework implementations. It implements repositories exposed by the domain layer (e.g., LocationRepository) to retrieve or mutate data. It acts as an adapter, formatting the framework conveniently.
 
-# watch mode
-$ npm run start:dev
+The API layer is the interface of the application. It serves incoming requests, checks permissions, handles errors, etc.
 
-# production mode
-$ npm run start:prod
-```
+### 3. Database Design
+![Nested Set Model](documents/nested-set-model.png)
 
-## Test
+The database supports an "address location tree," meaning one record can have multiple children and infinite nesting. To address this, I apply the Nested Set Model to solve this business use case.
 
-```bash
-# unit tests
-$ npm run test
+The Nested Set Model algorithm can handle complex queries involving nested comments and objects, which traditional parent-child models struggle with due to multiple join operations. The Nested Set Model offers optimized query performance with a single query to retrieve all nested data.
 
-# e2e tests
-$ npm run test:e2e
+I chose the Materialized Path strategy and utilize PostgreSQL's inverted index to implement it. There are several reasons behind this decision:
 
-# test coverage
-$ npm run test:cov
-```
+- **Simplicity**: This pattern is simple to implement. Instead of storing one parentId, it stores all the parentIds (as an array of strings) related to it. This makes the project easier to maintain.
+  - Example:
+    - Location "Location 1" has id: 1
+    - SubLocation "Location 1.1" (id: 2) has parentIds: [1]
+    - SubLocation "Location 1.1.1" (id: 3) has parentIds: [1, 2]
+- **Performance**: This implementation offers optimized performance compared to the traditional Parent-Child Model. It might be slightly less optimized than the Nested Set Model but offers safer delete operations by locking only related records instead of the entire table.
 
-## Support
+![Database Design](documents/db-design.png)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 4. API
+![Swagger API](documents/swagger-api.png)
 
-## Stay in touch
+## Deployment
+This application uses AWS cloud services, including App Runner, ECR, Webpack to optimize image size and GitHub Actions for deployment.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Deployment URL: [https://fhnypyywvu.ap-southeast-1.awsapprunner.com/docs](https://fhnypyywvu.ap-southeast-1.awsapprunner.com/docs)
 
-## License
+## Usage
 
-Nest is [MIT licensed](LICENSE).
+#### With Docker
+
+**Requirements:** Docker must be installed on your local machine.
+
+**Steps:**
+1. Create and fill the `.env` file based on the `.env.template`.
+2. Run the following commands:
+    ```bash
+    docker build -t <IMAGE_TAG> .
+    docker run --name <CONTAINER_NAME> -p 3000:3000 <IMAGE_NAME>
+    ```
+3. Go to [http://localhost:3000/docs](http://localhost:3000/docs) to see the results.
+
+#### With Docker Compose
+
+**Requirements:** Docker must be installed on your local machine.
+
+**Steps:**
+1. Run the following commands:
+    ```bash
+    docker-compose up -d
+    ```
+2. Go to [http://localhost:3000/docs](http://localhost:3000/docs) to see the results.
+
