@@ -49,8 +49,12 @@ jobs:
           access-role-arn: ${{ secrets.ROLE_ARN }}
           cpu: 1
           memory: 2
-          port: 8080
-          wait-for-service-stability: true
+          wait-for-service-stability-second: 1200
+          port: 3000
+          copy-env-vars: |
+            while IFS='=' read -r key value; do
+            export "$key"="$value"
+            done < .env
 
       - name: App Runner output
         run: echo "App runner output ${{ steps.deploy-apprunner.outputs.service-id }}"
