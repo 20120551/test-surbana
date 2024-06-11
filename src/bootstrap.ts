@@ -23,13 +23,12 @@ export type BootstrapOptions = NestApplicationOptions & {
 };
 
 export const setupSwagger = (app: INestApplication) => {
-  const environment = env.NODE_ENV ?? '';
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Location')
     .setDescription('The Location API description')
     .setVersion('1.0')
     .addBearerAuth()
-    .addServer(`/${environment}`)
+    .addServer(`/`)
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document, {
