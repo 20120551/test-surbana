@@ -104,7 +104,7 @@ export class LocationRepository implements ILocationRepository {
 
     const entity = this.locationFactory.create({
       ...createdLocation,
-      parentIds: location.parentIds as string[],
+      parentIds: createdLocation.parentIds as string[],
     });
 
     this.logger.info('Create location success', {

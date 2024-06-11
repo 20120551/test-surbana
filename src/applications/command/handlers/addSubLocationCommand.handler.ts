@@ -25,7 +25,9 @@ export class AddSubLocationCommandHandler
   async execute(
     command: AddSubLocationCommand,
   ): Promise<LocationResponseDetailDto> {
-    this.logger.info(`Handling execute command 'AddSubLocationCommand'`);
+    this.logger.info(`Handling execute command 'AddSubLocationCommand'`, {
+      correlationId: command.parentLocationId,
+    });
 
     const { parentLocationId, building, locationName, locationNumber, area } =
       command;
@@ -49,7 +51,9 @@ export class AddSubLocationCommandHandler
 
     const location = await this.locationRepository.create(locationEntity);
 
-    this.logger.info(`Handled execute command 'AddSubLocationCommand'`);
+    this.logger.info(`Handled execute command 'AddSubLocationCommand'`, {
+      correlationId: command.parentLocationId,
+    });
 
     parentLocation.addLocation(location);
     return parentLocation;

@@ -20,6 +20,12 @@ export class LocationResponseDto {
     type: Number,
   })
   area: number;
+
+  @ApiProperty({
+    type: String,
+    isArray: true,
+  })
+  parentIds: string[];
 }
 
 export class LocationResponseDetailDto extends LocationResponseDto {
